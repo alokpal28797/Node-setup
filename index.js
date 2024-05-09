@@ -5,9 +5,8 @@ import cookieParser from "cookie-parser";
 import cors from 'cors';
 import userRouter from "./app/routes/user.routes.js";
 
-dotenv.config({
-    path: './.env'
-})
+
+dotenv.config({ path: "./.env" });
 
 const app = express();
 
@@ -34,6 +33,7 @@ connectDb()
         })
 
         app.listen(process.env.PORT || 8000, () => {
+            console.log("🚀 ~ app.listen ~ process.env.POR:", process.env.PORT)
             console.log(`Server listening on ${process.env.PORT || "8000"} `)
         })
     })

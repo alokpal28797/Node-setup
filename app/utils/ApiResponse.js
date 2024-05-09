@@ -1,11 +1,25 @@
-class ApiResponse {
-    constructor(statusCode, data, message = "Success") {
 
-        this.statusCode = statusCode;
-        this.data = data;
-        this.message = message;
-        this.success = statusCode < 400;   // we have put this cond ass i we are sending something code has to be lower that 400, according to standard of status codes
-    }
-}
+// Default Response For Every Api
+export const ApiResponse = (
+	res,
+	statusCode,
+	message,
+	data,
+	total, 
+	page,
 
-export default new ApiResponse()
+) => {
+	let response = {
+		statusCode: statusCode,
+		message: message,
+		data: data,
+	};
+	if (total) {
+		response = { ...response, total };
+	}
+	if (page) {
+		response = { ...response, page };
+	}
+
+	return res.status(statusCode).json(response);
+};
