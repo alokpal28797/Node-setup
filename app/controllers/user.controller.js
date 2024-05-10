@@ -42,14 +42,19 @@ export const registerUser = asyncHandler(async (req, res) => {
     if (alreadyExists) {
         throw new ApiError(409, "User Already exists");
     }
-    const avatarLocalPath = req.files?.avatar[0]?.path;
+    console.log("🚀 ~ registerUser ~  req.files:", req.files)
 
-    const coverImageLocalPath = req.files?.coverImage[0]?.path
+    const avatarLocalPath = req?.files?.avatar ? req?.files?.avatar[0]?.path : undefined;
 
-    if (!avatarLocalPath) {
-        throw new ApiError(400, "Avatar LocalPath is required")
+    let coverImageLocalPath;
+    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalPath = req.files.coverImage[0].path
     }
 
+
+    if (!avatarLocalPath) {
+        throw new ApiError(400, "Avatar file is required")
+    }
     const avatar = await uploadOnCloudinary(avatarLocalPath)
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
@@ -107,7 +112,7 @@ export const loginUser = asyncHandler(async (req, res) => {
     console.log("🚀 ~ loginUser ~ accessToken:", accessToken)
 
     const response = {
-        _id: isUserExist._id, 
+        _id: isUserExist._id,
         fullName: isUserExist.fullName,
         avatar: isUserExist.avatar,
         coverImage: isUserExist.coverImage,
@@ -120,8 +125,17 @@ export const loginUser = asyncHandler(async (req, res) => {
         secure: true
     }
 
-    return res.status(200).cookie("accessToken", accessToken, options).cookie("refreshToken", refreshToken, options).json( {...response,accessToken, refreshToken, });
-    // return ApiResponse(res, 200, "User logged in successfully", {...response,accessToken, refreshToken, });
+    // return res.status(200).cookie("accessToken", accessToken, options).cookie("refreshToken", refreshToken, options).json({ status : 200, message: "User logged in successfully" });
+    return ApiResponse(
+        res,
+        200,
+        "User logged in successfully",
+        response,
+        accessToken,
+        refreshToken,
+        options
+    );
+
 
 })
 
@@ -139,8 +153,19 @@ export const logout = asyncHandler(async (req, res,) => {
         httpOnly: true,
         secure: true
     }
-    return res.status(200)
-        .clearCookie("accessToken", options)
-        .cookie("refreshToken", options)
-        .json(ApiResponse(res, 200, "User logged out"))
+    // return res.status(200)
+    //     .clearCookie("accessToken", options)
+    //     .clearCookie("refreshToken", options)
+    //     .json({ status: 200, message: "User logged out", success: true })
+
+    return ApiResponse(
+        res,
+        200,
+        "User logged out successfully",
+        null,
+        null,
+        null,
+        options,
+        true // clear cookies
+    );
 })

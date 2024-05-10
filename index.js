@@ -4,6 +4,7 @@ import express from 'express';
 import cookieParser from "cookie-parser";
 import cors from 'cors';
 import userRouter from "./app/routes/user.routes.js";
+import { customError, notFound } from "./app/utils/ApiError.js";
 
 
 dotenv.config({ path: "./.env" });
@@ -25,6 +26,10 @@ app.use(cookieParser());  // to store cookies from server to browser securely
 
 app.use('/api/v1/users',userRouter)
 
+
+app.use(notFound);
+app.use(customError);
+
 connectDb()
     .then(() => {
         app.on('error', (error) => {
@@ -33,7 +38,7 @@ connectDb()
         })
 
         app.listen(process.env.PORT || 8000, () => {
-            console.log("🚀 ~ app.listen ~ process.env.POR:", process.env.PORT)
+            console.log("🚀 ~ app.listen ~ process.env.PORT:", process.env.PORT)
             console.log(`Server listening on ${process.env.PORT || "8000"} `)
         })
     })
