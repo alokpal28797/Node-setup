@@ -1,6 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
+dotenv.config({ path: "./.env" });
 
 const userSchema = new Schema({
     userName: {
@@ -57,7 +59,7 @@ const userSchema = new Schema({
 
 // It is used to handle before saving changes
 userSchema.pre('save', async function (next) {
-    if (!this.isModified("password")) {
+    if (this.isModified("password")) {
         this.password = await bcrypt.hash(this.password, 10)
         next();
     }
@@ -68,7 +70,7 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 }
 
 userSchema.methods.generateAccesstoken = async function () {
-    jwt.sign({
+    return await jwt.sign({
         _id: this._id,
         email: this.email,
         userName: this.userName,
@@ -77,7 +79,7 @@ userSchema.methods.generateAccesstoken = async function () {
 }
 
 userSchema.methods.generateRefreshtoken = async function () {
-    jwt.sign({
+    return await jwt.sign({
         _id: this._id,
     }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRY })
 }
